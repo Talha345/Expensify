@@ -15,6 +15,7 @@ import AnchorForAttachmentsOnly from '../../AnchorForAttachmentsOnly';
 import * as Url from '../../../libs/Url';
 import ROUTES from '../../../ROUTES';
 import tryResolveUrlFromApiRoot from '../../../libs/tryResolveUrlFromApiRoot';
+import * as Environment from "../../../libs/Environment/Environment";
 
 function AnchorRenderer(props) {
     const htmlAttribs = props.tnode.attributes;
@@ -26,6 +27,7 @@ function AnchorRenderer(props) {
     const attrHref = htmlAttribs.href || '';
     const attrPath = lodashGet(Url.getURLObject(attrHref), 'path', '').replace('/', '');
     const hasExpensifyOrigin = Url.hasSameExpensifyOrigin(attrHref, CONFIG.EXPENSIFY.EXPENSIFY_URL) || Url.hasSameExpensifyOrigin(attrHref, CONFIG.EXPENSIFY.STAGING_API_ROOT);
+    const hasSameOrigin = Url.hasSameExpensifyOrigin(attrHref, window.location.origin);
     const internalNewExpensifyPath =
         (Url.hasSameExpensifyOrigin(attrHref, CONST.NEW_EXPENSIFY_URL) || Url.hasSameExpensifyOrigin(attrHref, CONST.STAGING_NEW_EXPENSIFY_URL)) &&
         !CONST.PATHS_TO_TREAT_AS_EXTERNAL.includes(attrPath)
@@ -46,9 +48,14 @@ function AnchorRenderer(props) {
             return;
         }
 
+        if (Environment.isDevelopment()) {
+            Navigation.navigate(internalNewExpensifyPath);
+            return;
+        }
+
         // If we are handling a New Expensify link then we will assume this should be opened by the app internally. This ensures that the links are opened internally via react-navigation
         // instead of in a new tab or with a page refresh (which is the default behavior of an anchor tag)
-        if (internalNewExpensifyPath) {
+        if (internalNewExpensifyPath && hasSameOrigin) {
             Navigation.navigate(internalNewExpensifyPath);
             return;
         }
