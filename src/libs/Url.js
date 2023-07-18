@@ -77,10 +77,17 @@ function getPathFromDevURL(url) {
     return path.substring(1); // Remove the leading '/'
 }
 
+function hasSameOrigin(url1, url2) {
+    const host1 = new URL(url1).host;
+    const host2 = new URL(url2).host;
+    return host1 === host2;
+}
+
 export {
     // eslint-disable-next-line import/prefer-default-export
     addTrailingForwardSlash,
     hasSameExpensifyOrigin,
     getURLObject,
     getPathFromDevURL,
+    hasSameOrigin,
 };
