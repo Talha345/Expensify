@@ -15,7 +15,7 @@ import AnchorForAttachmentsOnly from '../../AnchorForAttachmentsOnly';
 import * as Url from '../../../libs/Url';
 import ROUTES from '../../../ROUTES';
 import tryResolveUrlFromApiRoot from '../../../libs/tryResolveUrlFromApiRoot';
-import * as Environment from "../../../libs/Environment/Environment";
+import * as Environment from '../../../libs/Environment/Environment';
 
 function AnchorRenderer(props) {
     const htmlAttribs = props.tnode.attributes;
@@ -25,14 +25,16 @@ function AnchorRenderer(props) {
     const displayName = lodashGet(props.tnode, 'domNode.children[0].data', '');
     const parentStyle = lodashGet(props.tnode, 'parent.styles.nativeTextRet', {});
     const attrHref = htmlAttribs.href || '';
-    const attrPath = lodashGet(Url.getURLObject(attrHref), 'path', '').replace('/', '');
+    const isDevUrl = attrHref.startsWith(CONST.DEV_NEW_EXPENSIFY_URL);
+    const attrPath = isDevUrl ? Url.getPathFromDevURL(attrHref) : lodashGet(Url.getURLObject(attrHref), 'path', '').replace('/', '');
     const hasExpensifyOrigin = Url.hasSameExpensifyOrigin(attrHref, CONFIG.EXPENSIFY.EXPENSIFY_URL) || Url.hasSameExpensifyOrigin(attrHref, CONFIG.EXPENSIFY.STAGING_API_ROOT);
     const hasSameOrigin = Url.hasSameExpensifyOrigin(attrHref, window.location.origin);
     const internalNewExpensifyPath =
-        (Url.hasSameExpensifyOrigin(attrHref, CONST.NEW_EXPENSIFY_URL) || Url.hasSameExpensifyOrigin(attrHref, CONST.STAGING_NEW_EXPENSIFY_URL)) &&
+        (Url.hasSameExpensifyOrigin(attrHref, CONST.NEW_EXPENSIFY_URL) || Url.hasSameExpensifyOrigin(attrHref, CONST.STAGING_NEW_EXPENSIFY_URL) || isDevUrl) &&
         !CONST.PATHS_TO_TREAT_AS_EXTERNAL.includes(attrPath)
             ? attrPath
             : '';
+    const internalNewDevExpensifyPath = isDevUrl && !CONST.PATHS_TO_TREAT_AS_EXTERNAL.includes(attrPath) ? attrPath : '';
     const internalExpensifyPath =
         hasExpensifyOrigin && !attrPath.startsWith(CONFIG.EXPENSIFY.CONCIERGE_URL_PATHNAME) && !attrPath.startsWith(CONFIG.EXPENSIFY.DEVPORTAL_URL_PATHNAME) && attrPath;
     const navigateToLink = () => {
@@ -48,8 +50,8 @@ function AnchorRenderer(props) {
             return;
         }
 
-        if (Environment.isDevelopment()) {
-            Navigation.navigate(internalNewExpensifyPath);
+        if (Environment.isDevelopment() && isDevUrl) {
+            Navigation.navigate(internalNewDevExpensifyPath);
             return;
         }
 
@@ -106,7 +108,7 @@ function AnchorRenderer(props) {
             key={props.key}
             displayName={displayName}
             // Only pass the press handler for internal links. For public links or whitelisted internal links fallback to default link handling
-            onPress={internalNewExpensifyPath || internalExpensifyPath ? navigateToLink : undefined}
+            onPress={internalNewExpensifyPath || internalExpensifyPath || internalNewDevExpensifyPath ? navigateToLink : undefined}
         >
             <TNodeChildrenRenderer tnode={props.tnode} />
         </AnchorForCommentsOnly>

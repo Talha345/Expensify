@@ -72,9 +72,15 @@ function hasSameExpensifyOrigin(url1, url2) {
     return host1WithoutW3 === host2WithoutW3;
 }
 
+function getPathFromDevURL(url) {
+    const path = new URL(url).pathname;
+    return path.substring(1); // Remove the leading '/'
+}
+
 export {
     // eslint-disable-next-line import/prefer-default-export
     addTrailingForwardSlash,
     hasSameExpensifyOrigin,
     getURLObject,
+    getPathFromDevURL,
 };
