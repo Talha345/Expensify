@@ -1,4 +1,5 @@
 import {URL_WEBSITE_REGEX} from 'expensify-common/lib/Url';
+import 'react-native-url-polyfill/auto';
 
 /**
  * Add / to the end of any URL if not present
@@ -73,11 +74,17 @@ function hasSameExpensifyOrigin(url1, url2) {
 }
 
 function getPathFromDevURL(url) {
+    if (!url) {
+        return undefined;
+    }
     const path = new URL(url).pathname;
     return path.substring(1); // Remove the leading '/'
 }
 
 function hasSameOrigin(url1, url2) {
+    if (!url1 || !url2) {
+        return false;
+    }
     const host1 = new URL(url1).host;
     const host2 = new URL(url2).host;
     return host1 === host2;

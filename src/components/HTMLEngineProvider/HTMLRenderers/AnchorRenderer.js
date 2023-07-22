@@ -15,9 +15,11 @@ import AnchorForAttachmentsOnly from '../../AnchorForAttachmentsOnly';
 import * as Url from '../../../libs/Url';
 import ROUTES from '../../../ROUTES';
 import tryResolveUrlFromApiRoot from '../../../libs/tryResolveUrlFromApiRoot';
+import useEnvironment from '../../../hooks/useEnvironment';
 
 function AnchorRenderer(props) {
     const htmlAttribs = props.tnode.attributes;
+    const {environmentURL} = useEnvironment();
 
     // An auth token is needed to download Expensify chat attachments
     const isAttachment = Boolean(htmlAttribs[CONST.ATTACHMENT_SOURCE_ATTRIBUTE]);
@@ -27,7 +29,7 @@ function AnchorRenderer(props) {
     const isDevUrl = attrHref.startsWith(CONST.DEV_NEW_EXPENSIFY_URL);
     const attrPath = isDevUrl ? Url.getPathFromDevURL(attrHref) : lodashGet(Url.getURLObject(attrHref), 'path', '').replace('/', '');
     const hasExpensifyOrigin = Url.hasSameExpensifyOrigin(attrHref, CONFIG.EXPENSIFY.EXPENSIFY_URL) || Url.hasSameExpensifyOrigin(attrHref, CONFIG.EXPENSIFY.STAGING_API_ROOT);
-    const hasSameOrigin = Url.hasSameOrigin(attrHref, window.location.origin);
+    const hasSameOrigin = Url.hasSameOrigin(attrHref, environmentURL);
     const internalNewExpensifyPath =
         (Url.hasSameExpensifyOrigin(attrHref, CONST.NEW_EXPENSIFY_URL) || Url.hasSameExpensifyOrigin(attrHref, CONST.STAGING_NEW_EXPENSIFY_URL) || isDevUrl) &&
         !CONST.PATHS_TO_TREAT_AS_EXTERNAL.includes(attrPath)
