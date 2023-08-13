@@ -61,7 +61,6 @@ function MoneyRequestAmountForm({amount, currency, isEditing, forwardedRef, onCu
     const {translate, toLocaleDigit, fromLocaleDigit, numberFormat} = useLocalize();
 
     const textInput = useRef(null);
-
     const selectedAmountAsString = amount ? CurrencyUtils.convertToWholeUnit(currency, amount).toString() : '';
 
     const [currentAmount, setCurrentAmount] = useState(selectedAmountAsString);
@@ -99,10 +98,10 @@ function MoneyRequestAmountForm({amount, currency, isEditing, forwardedRef, onCu
      * @param {Number} amountInCurrencyUnits
      */
     const saveAmountToState = (currencyCode, amountInCurrencyUnits) => {
-        if (!currencyCode || !amountInCurrencyUnits) {
+        if (!currencyCode || typeof amountInCurrencyUnits !== 'number') {
             return;
         }
-        const amountAsStringForState = CurrencyUtils.convertToWholeUnit(currencyCode, amountInCurrencyUnits).toString();
+        const amountAsStringForState = amountInCurrencyUnits ? CurrencyUtils.convertToWholeUnit(currency, amount).toString() : '';
         setCurrentAmount(amountAsStringForState);
         setSelection({
             start: amountAsStringForState.length,
@@ -196,7 +195,6 @@ function MoneyRequestAmountForm({amount, currency, isEditing, forwardedRef, onCu
 
     const formattedAmount = MoneyRequestUtils.replaceAllDigits(currentAmount, toLocaleDigit);
     const buttonText = isEditing ? translate('common.save') : translate('common.next');
-
     return (
         <>
             <View

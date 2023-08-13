@@ -1,6 +1,6 @@
 import {withOnyx} from 'react-native-onyx';
-import {View} from 'react-native';
-import React from 'react';
+import {Linking, View} from 'react-native';
+import React, {useEffect} from 'react';
 import lodashGet from 'lodash/get';
 import PropTypes from 'prop-types';
 import ONYXKEYS from '../../ONYXKEYS';
@@ -21,6 +21,8 @@ import usePermissions from '../../hooks/usePermissions';
 import OnyxTabNavigator, {TopTab} from '../../libs/Navigation/OnyxTabNavigator';
 import participantPropTypes from '../../components/participantPropTypes';
 import NewRequestAmountPage from './steps/NewRequestAmountPage';
+import ROUTES from '../../ROUTES';
+import * as Url from '../../libs/Url';
 
 const propTypes = {
     /** React Navigation route */
@@ -75,6 +77,19 @@ function MoneyRequestSelectorPage(props) {
         const moneyRequestID = `${iouType}${reportID}`;
         IOU.resetMoneyRequestInfo(moneyRequestID);
     };
+
+    useEffect(() => {
+        const handleDeepLink = () => {
+            // Get the initial URL when the app was launched
+            Linking.getInitialURL().then((initialUrl) => {
+                if (!Url.addTrailingForwardSlash(initialUrl).includes(ROUTES.getMoneyRequestRoute(iouType))) {
+                    return;
+                }
+                resetMoneyRequestInfo();
+            });
+        };
+        handleDeepLink();
+    }, []);
 
     return (
         <ScreenWrapper includeSafeAreaPaddingBottom={false}>
